@@ -7,7 +7,8 @@
 package org.team4213.lib14;
 
 /**
- *
+ * PID Controller for a system such as a turntable, where quickly hitting the heading is desired, and wraparound isn't an issue.
+ * I.E. error between 270 and 0 is -90, not 270.
  * @author hughest1
  */
 public class AnglePIDController extends PIDController {

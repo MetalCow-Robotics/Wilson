@@ -7,7 +7,8 @@
 package org.team4213.lib14;
 
 /**
- *
+ * Wrapper/convenience class for the AIRFLO gamepads that MetalCow has
+ * 
  * @author hughest1
  */
 import edu.wpi.first.wpilibj.Joystick;
