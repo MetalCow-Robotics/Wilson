@@ -27,4 +27,21 @@ public class CowMath {
         else if (in<-limit) return -limit;
         else return in;
     }
+    
+    static double[] normalize(double[] powers, double to) {
+        double maxMag = to;
+        for (int i=0; i<powers.length; i++) {
+            if (Math.abs(powers[i]) > maxMag)
+                maxMag = Math.abs(powers[i]);
+        }
+        if (maxMag <= to) return powers;
+        for (int i=0; i<powers.length; i++) {
+            powers[i] = powers[i] * to/maxMag;
+        }
+        return powers;
+    }
+    
+    static double[] normalize(double[] powers){
+        return normalize(powers, 1);
+    }
 }
