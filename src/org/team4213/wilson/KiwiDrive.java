@@ -37,14 +37,19 @@ public class KiwiDrive {
             regulateHeading = fieldOriented = haloDrive = false;
         } else{
             regulateHeading=true;
-            imu.zeroYaw();
+            if (imuAvailable())
+                imu.zeroYaw();
         }
     }
     public void toggleFieldOriented() {
         if(fieldOriented) {
             fieldOriented=false;
         } else {
-            regulateHeading=true;
+            if (!regulateHeading) {
+                regulateHeading=true;
+                if (imuAvailable())
+                    imu.zeroYaw();
+            }
             fieldOriented=true;
             haloDrive=false;
         }
@@ -53,7 +58,11 @@ public class KiwiDrive {
         if(haloDrive) {
             haloDrive=false;
         }else {
-            regulateHeading=true;
+            if (!regulateHeading) {
+                regulateHeading=true;
+                if (imuAvailable())
+                    imu.zeroYaw();
+            }
             haloDrive=true;
             fieldOriented=false;
         }
@@ -67,38 +76,48 @@ public class KiwiDrive {
             imuSerialPort = new BufferingSerialPort (57600);
             imu = new IMU(imuSerialPort, (byte)75);
         }catch(VisaException e){
+            e.printStackTrace();
             imuSerialPort = null;
             imu = null;
         }
         
-        motors[1] = new CowVic(1,false,0.8);
-        motors[2] = new CowVic(2,true,0.8);
-        motors[3] = new CowVic(3,false,0.8);
+        motors[0] = new CowVic(1,true,0.6);
+        motors[1] = new CowVic(2,false,0.6);
+        motors[2] = new CowVic(3,true,0.6);
         
-        headingController = new AnglePIDController(0.5,0,0,0);
+        headingController = new AnglePIDController(1.0/90.0,0,0,0);
         headingController.addTarget("north", 0);
         headingController.addTarget("east", 90);
         headingController.addTarget("south", 180);
         headingController.addTarget("west", 270);
     }
     
+    public boolean imuAvailable() {
+        return imu!=null && imuSerialPort!=null;
+    }
+    
+    public double getCurrentHeading() {
+        if (this.imuAvailable())
+            return imu.getYaw();
+        else return 0;
+    }
+    
     public void rawDriveXYWT(double x, double y, double omega, double maxSpeed) {
-        // TODO: Implement this
-        
+         
         double[] powers = CowMath.normalize(
             new double[] {
-                1/2*x + 0.866*y + omega,
-                -1/2*x + 0.866*y -omega,
+                0.5*x + 0.866*y + omega,
+                -0.5*x + 0.866*y -omega,
                 - x + omega
             }
-        );
+        ,maxSpeed);
         
         for(int i=0;i<powers.length;i++)
             motors[i].set(powers[i]);
     }
     
     public void driveXYW(double x, double y, double omega, double maxSpeed) {
-        if (regulateHeading) {
+        if (imuAvailable() && regulateHeading) {
             if (haloDrive) {
                 double commandTheta = MathUtils.atan2(x,y)*180/Math.PI;
                 headingController.setTarget(commandTheta);

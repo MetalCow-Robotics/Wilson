@@ -47,6 +47,11 @@ public class AIRFLOController extends Joystick {
 	public boolean getHeadingPadPressed(){
 		return getRawButton(1) || getRawButton(2) || getRawButton(3) || getRawButton(4);
 	}
+        public double getThrottle() {
+            if(getRawButton(8) || getRawButton(7)) return 0.55;
+            else if(getRawButton(6) || getRawButton(9)) return 1;
+            else return 0.25;
+        }
 	
 	public double getHeadingPadDirection(){
 		float x=0, y=0;

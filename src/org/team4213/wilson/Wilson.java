@@ -13,14 +13,14 @@ import org.team4213.lib14.AIRFLOController;
  */
 public class Wilson extends IterativeRobot {
     AIRFLOController user = new AIRFLOController(1);
-    KiwiDrive drive = new KiwiDrive();
+    KiwiDrive drive = new KiwiDrive();;
     
     /**
      * This function is run once when the robot is first started up and should be
      * used for any initialization code.
      */
     public void robotInit() {
-
+        
     }
     
     /**
@@ -54,6 +54,7 @@ public class Wilson extends IterativeRobot {
      * It is blocking.
      */
     public void teleopPeriodic() {
+        System.out.println("IMU: " + (drive.imuAvailable() ? Double.toString(drive.getCurrentHeading()) : "OFFLINE"));
         if (user.getButtonTripped(9)) drive.toggleRegulateHeading();
         if (user.getButtonTripped(10)) drive.toggleFieldOriented();
         if (user.getButtonTripped(11)) drive.toggleHaloDrive();
