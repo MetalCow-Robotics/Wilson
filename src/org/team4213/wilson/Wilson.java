@@ -2,6 +2,7 @@ package org.team4213.wilson;
 
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+import org.team4213.lib14.AIRFLOController;
 
 /**
  * This is the entry point!
@@ -11,6 +12,9 @@ import edu.wpi.first.wpilibj.IterativeRobot;
  * documentation.
  */
 public class Wilson extends IterativeRobot {
+    AIRFLOController user = new AIRFLOController(1);
+    KiwiDrive drive = new KiwiDrive();
+    
     /**
      * This function is run once when the robot is first started up and should be
      * used for any initialization code.
@@ -50,7 +54,11 @@ public class Wilson extends IterativeRobot {
      * It is blocking.
      */
     public void teleopPeriodic() {
+        if (user.getButtonTripped(9)) drive.toggleRegulateHeading();
+        if (user.getButtonTripped(10)) drive.toggleFieldOriented();
+        if (user.getButtonTripped(11)) drive.toggleHaloDrive();
         
+        drive.driveXYW(user.getLX(), user.getLY(), user.getRX(), user.getThrottle());
     }
     
 }
