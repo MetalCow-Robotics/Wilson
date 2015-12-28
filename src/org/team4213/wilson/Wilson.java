@@ -12,6 +12,10 @@ import edu.wpi.first.wpilibj.IterativeRobot;
  */
 public class Wilson extends IterativeRobot {
     /**
+     * @todo: Add classes
+     */
+    
+    /**
      * This function is run once when the robot is first started up and should be
      * used for any initialization code.
      */
@@ -50,7 +54,9 @@ public class Wilson extends IterativeRobot {
      * It is blocking.
      */
     public void teleopPeriodic() {
-        
+        /**
+         * @todo: Stitch things together
+         */
     }
     
 }

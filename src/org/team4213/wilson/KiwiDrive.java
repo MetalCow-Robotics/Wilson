@@ -39,6 +39,14 @@ public class KiwiDrive {
     }
     
     public void rawDriveXYWT(double x, double y, double omega, double maxSpeed) {
-        // TODO: Implement this
+        /**
+         * @todo: Implement this
+         */
+    }
+    
+    public void drive(double x, double y, double omega, double maxSpeed) {
+        /**
+         * @todo: Implement this
+         */
     }
 }

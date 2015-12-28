@@ -17,7 +17,9 @@ public class AnglePIDController extends PIDController {
         super(kp, ki, maxIInfluence, kd);
     }
     public double feedAndGetValue(double currentAngle) {
-        // TODO: Implement this; should figure out the minimum magnitude angle between current and target angles.
+        /**
+         * @todo: Implement this; should figure out the minimum magnitude angle between current and target angles.
+         */
         return super.feedAndGetValue(currentAngle);
     }
 }
