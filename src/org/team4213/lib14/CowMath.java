@@ -12,23 +12,23 @@ import com.sun.squawk.util.MathUtils;
  * @author Thaddeus Hughes
  */
 public class CowMath {
-    static double copySign(double from, double to) {
+    public static double copySign(double from, double to) {
         if (from>0) return Math.abs(to);
         else if (from<0) return -Math.abs(to);
         else return 0;
     }
     
-    static double expScale(double in, double power) {
+    public static double expScale(double in, double power) {
         return copySign(in, MathUtils.pow(Math.abs(in), power));
     }
     
-    static double limitToSignless(double in, double limit) {
+    public static double limitToSignless(double in, double limit) {
         if (in>limit) return limit;
         else if (in<-limit) return -limit;
         else return in;
     }
     
-    static double[] normalize(double[] powers, double to) {
+    public static double[] normalize(double[] powers, double to) {
         double maxMag = to;
         for (int i=0; i<powers.length; i++) {
             if (Math.abs(powers[i]) > maxMag)
@@ -41,7 +41,7 @@ public class CowMath {
         return powers;
     }
     
-    static double[] normalize(double[] powers){
+    public static double[] normalize(double[] powers){
         return normalize(powers, 1);
     }
 }
