@@ -16,8 +16,15 @@ public class AnglePIDController extends PIDController {
     public AnglePIDController(double kp, double ki, double maxIInfluence, double kd) {
         super(kp, ki, maxIInfluence, kd);
     }
+    
+    /**
+     * Like stock PID feedAndGetValue, but optimized for rotations.
+     * @param currentAngle the current angle value
+     * @return response
+     */
     public double feedAndGetValue(double currentAngle) {
-        // TODO: Implement this; should figure out the minimum magnitude angle between current and target angles.
+        while(target-currentAngle > 180) currentAngle+=360;
+        while(target-currentAngle < -180) currentAngle-=360;
         return super.feedAndGetValue(currentAngle);
     }
 }
