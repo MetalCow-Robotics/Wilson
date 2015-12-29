@@ -13,8 +13,8 @@ package org.team4213.lib14;
  */
 public class AnglePIDController extends PIDController {
 
-    public AnglePIDController(double kp, double ki, double maxIInfluence, double kd) {
-        super(kp, ki, maxIInfluence, kd);
+    public AnglePIDController(String prefix, double kp, double ki, double maxIInfluence, double kd) {
+        super(prefix, kp, ki, maxIInfluence, kd);
     }
     
     /**

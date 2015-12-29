@@ -85,7 +85,7 @@ public class KiwiDrive {
         motors[1] = new CowVic(2,false,0.6);
         motors[2] = new CowVic(3,true,0.6);
         
-        headingController = new AnglePIDController(1.0/90.0,0.1,1,0);
+        headingController = new AnglePIDController("drive.headingController",1.0/90.0,0.1,1,0);
         headingController.addTarget("north", 0);
         headingController.addTarget("east", 90);
         headingController.addTarget("south", 180);
