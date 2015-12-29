@@ -3,6 +3,7 @@ package org.team4213.wilson;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import org.team4213.lib14.AIRFLOController;
+import org.team4213.lib14.MCRIterativeRobot;
 
 /**
  * This is the entry point!
@@ -11,9 +12,14 @@ import org.team4213.lib14.AIRFLOController;
  * functions corresponding to each mode, as described in the IterativeRobot
  * documentation.
  */
-public class Wilson extends IterativeRobot {
+public class Wilson extends MCRIterativeRobot {
     AIRFLOController user = new AIRFLOController(1);
-    KiwiDrive drive = new KiwiDrive();;
+    KiwiDrive drive = new KiwiDrive();
+    
+    public Wilson() {
+        
+    }
+    
     
     /**
      * This function is run once when the robot is first started up and should be
@@ -32,7 +38,7 @@ public class Wilson extends IterativeRobot {
     }
 
     /**
-     * This function is called periodically (at about 50Hz) during autonomous.
+     * This function is called periodically (at about 100Hz) during autonomous.
      * It is blocking.
      */
     public void autonomousPeriodic() {
@@ -50,11 +56,10 @@ public class Wilson extends IterativeRobot {
     }
 
     /**
-     * This function is called periodically (at about 50Hz) during teleop.
+     * This function is called periodically (at about 100Hz) during teleop.
      * It is blocking.
      */
     public void teleopPeriodic() {
-        System.out.println("IMU: " + (drive.imuAvailable() ? Double.toString(drive.getCurrentHeading()) : "OFFLINE"));
         if (user.getButtonTripped(9)) drive.toggleRegulateHeading();
         if (user.getButtonTripped(10)) drive.toggleFieldOriented();
         if (user.getButtonTripped(11)) drive.toggleHaloDrive();

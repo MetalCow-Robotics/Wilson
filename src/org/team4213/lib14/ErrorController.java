@@ -21,10 +21,10 @@ public abstract class ErrorController {
     Hashtable targetsMap;
 
     // Prefix/identifier when logging/tweaking this controller
-    protected String prefix;
+    protected String name;
     
-    public ErrorController(String prefix) {
-        this.prefix=prefix;
+    public ErrorController(String name) {
+        this.name=name;
         this.targetsMap = new Hashtable();
         this.target=0;
     }

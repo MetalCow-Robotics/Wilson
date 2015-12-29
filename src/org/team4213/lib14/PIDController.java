@@ -39,8 +39,8 @@ public class PIDController extends ErrorController {
      * @param maxIInfluence the maximum influence the integral is allowed to have on the response
      * @param kd the derivative gain
      */
-    public PIDController(String prefix, double kp, double ki, double maxIInfluence, double kd) {
-        super(prefix);
+    public PIDController(String name, double kp, double ki, double maxIInfluence, double kd) {
+        super(name);
         this.kp=kp;
         this.ki=ki;
         this.maxIInfluence=maxIInfluence;
@@ -67,15 +67,15 @@ public class PIDController extends ErrorController {
         double timeSpan = timeSinceLastFeed.get();
         resetTimer();
         
-        kp=CowDash.getNumber(prefix+"_kp",kp);
-        ki=CowDash.getNumber(prefix+"_ki",ki);
-        kd=CowDash.getNumber(prefix+"_kd",kd);
-        maxIInfluence=CowDash.getNumber(prefix+"_maxIInfluence",maxIInfluence);
+        kp=CowDash.getNumber(name+"::kp",kp);
+        ki=CowDash.getNumber(name+"::ki",ki);
+        kd=CowDash.getNumber(name+"::kd",kd);
+        maxIInfluence=CowDash.getNumber(name+"::maxIInfluence",maxIInfluence);
         
         
         // Current error is target minus current value (duh)
         double thisError = target-currentValue;
-        CowDash.putNumber(prefix+"_error",thisError);
+        CowDash.putNumber(name+"::error",thisError);
         
         // Accumulate this error into the integral, weighted by the integral gain.
         integralResponse+=thisError*ki *timeSpan;

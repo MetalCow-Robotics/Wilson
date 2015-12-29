@@ -8,6 +8,7 @@ import com.sun.squawk.util.MathUtils;
 import edu.wpi.first.wpilibj.visa.VisaException;
 import java.util.Hashtable;
 import org.team4213.lib14.AnglePIDController;
+import org.team4213.lib14.CowDash;
 import org.team4213.lib14.CowMath;
 import org.team4213.lib14.CowVic;
 import org.team4213.lib14.PIDController;
@@ -19,6 +20,7 @@ import org.team4213.lib14.PIDController;
  * This class is for the drivetrain of Wilson, which is a Kiwi Drivetrain
  */
 public class KiwiDrive {
+    public String name = "KiwiDrive";
     
     // Stuff for the nav6 gyroscope/imu
     BufferingSerialPort imuSerialPort = null;
@@ -85,7 +87,7 @@ public class KiwiDrive {
         motors[1] = new CowVic(2,false,0.6);
         motors[2] = new CowVic(3,true,0.6);
         
-        headingController = new AnglePIDController("drive.headingController",1.0/90.0,0.1,1,0);
+        headingController = new AnglePIDController(name+"::headingController",1.0/90.0,0.1,1,0);
         headingController.addTarget("north", 0);
         headingController.addTarget("east", 90);
         headingController.addTarget("south", 180);
@@ -122,6 +124,11 @@ public class KiwiDrive {
     }
     
     public void driveXYW(double x, double y, double omega, double maxSpeed) {
+        CowDash.putBoolean(name+"::imuAvailable()", imuAvailable());
+        CowDash.putBoolean(name+"::regulateHeading", regulateHeading);
+        CowDash.putBoolean(name+"::haloDrive", haloDrive);
+        CowDash.putBoolean(name+"::fieldOriented", fieldOriented);
+        
         if (imuAvailable() && regulateHeading) {
             if (haloDrive) {
                 double commandTheta = MathUtils.atan2(x,y)*180/Math.PI;
