@@ -46,7 +46,7 @@ public class Wilson extends IterativeRobot {
      * This should be used for updating what each subsystem should do.
      */
     public void teleopInit() {
-        
+        drive.headingController.resetTimer();
     }
 
     /**
@@ -58,6 +58,7 @@ public class Wilson extends IterativeRobot {
         if (user.getButtonTripped(9)) drive.toggleRegulateHeading();
         if (user.getButtonTripped(10)) drive.toggleFieldOriented();
         if (user.getButtonTripped(11)) drive.toggleHaloDrive();
+        drive.setHeading(user.getHeadingPadCardinal());
         
         drive.driveXYW(user.getLX(), user.getLY(), user.getRX(), user.getThrottle());
     }

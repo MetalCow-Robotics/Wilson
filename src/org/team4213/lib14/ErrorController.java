@@ -6,6 +6,7 @@
 
 package org.team4213.lib14;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.Hashtable;
 
 /**
@@ -19,8 +20,11 @@ public abstract class ErrorController {
     // A hashtable (dictionary) that maps named setpoints (I.E. "North"->0, "East"->90) to values
     Hashtable targetsMap;
 
+    // Prefix/identifier when logging/tweaking this controller
+    protected String prefix;
     
-    public ErrorController() {
+    public ErrorController(String prefix) {
+        this.prefix=prefix;
         this.targetsMap = new Hashtable();
         this.target=0;
     }

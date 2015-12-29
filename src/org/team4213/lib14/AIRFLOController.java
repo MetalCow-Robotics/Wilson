@@ -61,6 +61,14 @@ public class AIRFLOController extends Joystick {
 		if (getRawButton(4)) y+=1;
 		return Math.toDegrees(MathUtils.atan2(x, y));
 	}
+        
+        public String getHeadingPadCardinal(){
+            if (getRawButton(1)) return "south";
+            if (getRawButton(2)) return "east";
+            if (getRawButton(3)) return "west";
+            if (getRawButton(4)) return "north";
+            return null;
+        }
 	
 	public boolean getButton(int n) {
 		//previousStates[n] = getRawButton(n);
