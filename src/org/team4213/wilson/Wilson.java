@@ -2,6 +2,8 @@ package org.team4213.wilson;
 
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import org.team4213.lib14.AIRFLOController;
 
 /**
  * This is the entry point!
@@ -11,16 +13,20 @@ import edu.wpi.first.wpilibj.IterativeRobot;
  * documentation.
  */
 public class Wilson extends IterativeRobot {
-    /**
-     * @todo: Add classes
-     */
-    
-    /**
+KiwiDrive Drive = new KiwiDrive();
+AIRFLOController user = new AIRFLOController(1);
+
+    /*
      * This function is run once when the robot is first started up and should be
      * used for any initialization code.
      */
     public void robotInit() {
-
+        SmartDashboard.putNumber("kp", 1.0/180.0*1000);
+        SmartDashboard.putNumber("ki", 1.0/180.0);
+        SmartDashboard.putNumber("kd", 1.0/180.0);
+        System.out.println("===================");
+        System.out.println("     robotInit");
+        System.out.println("===================");
     }
     
     /**
@@ -28,7 +34,7 @@ public class Wilson extends IterativeRobot {
      * It is blocking.
      */
     public void autonomousInit() {
-        
+            System.out.println("autonomousInit");
     }
 
     /**
@@ -36,7 +42,7 @@ public class Wilson extends IterativeRobot {
      * It is blocking.
      */
     public void autonomousPeriodic() {
-
+    System.out.println("autonomousPeriodic");
     }
     
     /**
@@ -46,7 +52,7 @@ public class Wilson extends IterativeRobot {
      * This should be used for updating what each subsystem should do.
      */
     public void teleopInit() {
-        
+    System.out.println("teleopInit");        
     }
 
     /**
@@ -54,9 +60,7 @@ public class Wilson extends IterativeRobot {
      * It is blocking.
      */
     public void teleopPeriodic() {
-        /**
-         * @todo: Stitch things together
-         */
+       Drive.drive(user.getLX(), user.getLY(), user.getRX(), user.getButton(8) ? 1 : 0.35);
     }
     
 }

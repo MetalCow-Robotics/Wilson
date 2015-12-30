@@ -30,7 +30,7 @@ public class AIRFLOController extends Joystick {
 	}
 	
 	public double getLY(){
-		return -getRawAxis(2);
+		return getRawAxis(2);
 	}
 	
 	public double getLX(){
