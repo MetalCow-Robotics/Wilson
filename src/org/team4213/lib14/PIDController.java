@@ -8,6 +8,8 @@ package org.team4213.lib14;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * An ErrorController implemented with a simple Proportional-(limited)Integral-Derivative controller
@@ -19,17 +21,29 @@ public class PIDController extends ErrorController {
      * Constants for the controller
      * @var kp the proportional gain
      * @var ki the integral gain
-     * @var maxIInfluence the maximum influence the integral is allowed to have on the response
      * @var kd the derivative gain
+     * @var integralLifespan how (in seconds) long the positionData will go for
      */
-    public double kp, ki, maxIInfluence, kd;
+    public double kp, ki, kd, integralLifespan;
     
-    // The last value the system was at
-    double lastValue=0;
-    // The integral of errors
-    double integralResponse=0;
+    // Previous position data
+    Vector positionData = new Vector();
     
-    Timer timeSinceLastFeed;
+    // One of the data points for positions
+    private class PositionDataPoint {
+        public double value;
+        public Timer time;
+        /**
+         * Creates a new PositionDataPoint and starts its timer.
+         * @param val the value at time of creation
+         */
+        public PositionDataPoint(double val) {
+            this.value = val;
+            time = new Timer();
+            time.reset();
+            time.start();
+        }
+    }
     
     /**
      * Creates a new PID controller.
@@ -39,55 +53,64 @@ public class PIDController extends ErrorController {
      * @param maxIInfluence the maximum influence the integral is allowed to have on the response
      * @param kd the derivative gain
      */
-    public PIDController(String name, double kp, double ki, double maxIInfluence, double kd) {
+    public PIDController(String name, double kp, double ki, double kd, double integralLifespan) {
         super(name);
         this.kp=kp;
         this.ki=ki;
-        this.maxIInfluence=maxIInfluence;
+        this.integralLifespan=integralLifespan;
         this.kd=kd;
-        this.timeSinceLastFeed = new Timer();
-        resetTimer();
     }
     
     /**
-     * Resets the integral response to zero.
+     * Resets the past data points to nothing.
      */
-    public void resetIntegral() {
-        integralResponse=0;
+    public void reset() {
+        positionData = new Vector();
     }
     
-    public void resetTimer() {
-        timeSinceLastFeed.reset();
-        timeSinceLastFeed.start();
-    }
     
-    // TODO: Add time as a factor into this
-    // TODO: Use a list/time-limited integral
-    public double feedAndGetValue(double currentValue) {
-        double timeSpan = timeSinceLastFeed.get();
-        resetTimer();
-        
+    public double feedAndGetValue(double currentValue) { 
+        // Read constants values off of the CowDash
         kp=CowDash.getNumber(name+"::kp",kp);
         ki=CowDash.getNumber(name+"::ki",ki);
         kd=CowDash.getNumber(name+"::kd",kd);
-        maxIInfluence=CowDash.getNumber(name+"::maxIInfluence",maxIInfluence);
+        integralLifespan=CowDash.getNumber(name+"::integralLifespan", integralLifespan);
         
         
-        // Current error is target minus current value (duh)
-        double thisError = target-currentValue;
-        CowDash.putNumber(name+"::error",thisError);
+        // Current error is target minus current value
+        PositionDataPoint thisValue = new PositionDataPoint(currentValue);
+        CowDash.putNumber(name+"::error", target-thisValue.value);
         
-        // Accumulate this error into the integral, weighted by the integral gain.
-        integralResponse+=thisError*ki *timeSpan;
-        // Limit the integral response magnitude to the maxIInfluence
-        integralResponse = CowMath.limitToSignless(integralResponse, maxIInfluence);
         
-        // Derivative is the difference between current and last errors (divided by time inbetween loops but this is rough)
-        double derivative = (thisError-(target-lastValue)) /timeSpan;
-        // Set the last value to the current one
-        lastValue=currentValue;
+        double integral = 0;
+        double derivative = 0;
+        // If we have data on the past, integral and derivative can be computed.
+        if (positionData.size() > 0) {
+            // Compute integral by summing up all errors contained within the positionData, weighted by time inbetween each.
+            Enumeration e = positionData.elements();
+            PositionDataPoint lastElement = (PositionDataPoint)e.nextElement();
+            while( e.hasMoreElements() ) {
+                PositionDataPoint currentElement = (PositionDataPoint) e.nextElement();
+                integral += (target - currentElement.value) * (lastElement.time.get() - currentElement.time.get());
+            }
         
-        // Sum up terms and return them to give the response
-        return thisError*kp + integralResponse + derivative*kd;
+            // Compute derivative by subtracting current value from last recorded, divided by time inbetween.
+            PositionDataPoint lastData = ((PositionDataPoint)positionData.lastElement());
+            derivative =  (lastData.value - thisValue.value)/lastData.time.get();
+        }
+        
+        // Add this data point to the position data history
+        positionData.addElement(thisValue);
+        // Trim old entries from the position data history
+        while(((PositionDataPoint)positionData.firstElement()).time.get() > integralLifespan)
+            positionData.removeElementAt(0);
+        
+        // Log info about the integral and derivative
+        CowDash.putNumber(name+"::integral", integral);
+        CowDash.putNumber(name+"::derivative", derivative);
+        
+        // Return summed terms: Proportional, Integral, Derivative
+        return (target-thisValue.value)*kp/1000 + integral*ki/1000 + derivative*kd/1000;
+        
     }
 }

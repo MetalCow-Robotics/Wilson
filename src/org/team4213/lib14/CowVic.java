@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.Victor;
  * @author Thaddeus Hughes
  */
 public class CowVic extends Victor {
-    private double exponentialScaling;
+    public double exponentialScaling;
     private boolean invert;
     
     public CowVic(int port) {

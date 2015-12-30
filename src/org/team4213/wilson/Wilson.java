@@ -52,7 +52,7 @@ public class Wilson extends MCRIterativeRobot {
      * This should be used for updating what each subsystem should do.
      */
     public void teleopInit() {
-        drive.headingController.resetTimer();
+        drive.headingController.reset();
     }
 
     /**
@@ -60,11 +60,15 @@ public class Wilson extends MCRIterativeRobot {
      * It is blocking.
      */
     public void teleopPeriodic() {
+        // Toggles
         if (user.getButtonTripped(9)) drive.toggleRegulateHeading();
         if (user.getButtonTripped(10)) drive.toggleFieldOriented();
         if (user.getButtonTripped(11)) drive.toggleHaloDrive();
+        
+        // Maps buttons 1-4 of the gamepad to cardinal directions on the field
         drive.setHeading(user.getHeadingPadCardinal());
         
+        // Sends joystick data to the drivetrain
         drive.driveXYW(user.getLX(), user.getLY(), user.getRX(), user.getThrottle());
     }
     

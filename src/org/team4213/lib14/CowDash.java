@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Enumeration;
 import javax.microedition.io.Connector;
+
 /**
  * Convenience wrapper for SmartDashboard
  *
@@ -27,6 +28,13 @@ public class CowDash {
         
     }
     
+    /**
+     * Under construction
+     * 
+     * @author hughest1
+     * 
+     * Saves dash data to cRIO flash
+     */
     static public void save() {
         FileConnection fileConnection = null;
         try {

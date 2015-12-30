@@ -83,11 +83,11 @@ public class KiwiDrive {
             imu = null;
         }
         
-        motors[0] = new CowVic(1,true,0.6);
-        motors[1] = new CowVic(2,false,0.6);
-        motors[2] = new CowVic(3,true,0.6);
+        motors[0] = new CowVic(1,true,1);
+        motors[1] = new CowVic(2,false,1);
+        motors[2] = new CowVic(3,true,1);
         
-        headingController = new AnglePIDController(name+"::headingController",1.0/90.0,0.1,1,0);
+        headingController = new AnglePIDController(name+"::headingController",1000.0/180.0,0,0, 0.2);
         headingController.addTarget("north", 0);
         headingController.addTarget("east", 90);
         headingController.addTarget("south", 180);
@@ -110,58 +110,99 @@ public class KiwiDrive {
     }
     
     public void rawDriveXYWT(double x, double y, double omega, double maxSpeed) {
-         
+        // Get scaling factor from dashboard and apply it to all motors
+        for (int m=0;m<motors.length;m++)
+            motors[m].exponentialScaling =CowDash.getNumber(name+"::exponentialScaling",1);
+        
+        // Compute drive speed for each wheel
         double[] powers = CowMath.normalize(
             new double[] {
-                0.5*x + 0.866*y + omega,
-                -0.5*x + 0.866*y -omega,
-                - x + omega
+                // The only reason omega is multiplied by 0.5 is to tone down how fast turns occur.
+                (0.5*x + 0.866*y + omega*0.5),
+                (-0.5*x + 0.866*y -omega*0.5),
+                (- x + omega*0.5)
             }
         ,maxSpeed);
         
+        // Send out motor commands
         for(int i=0;i<powers.length;i++)
             motors[i].set(powers[i]);
     }
     
     public void driveXYW(double x, double y, double omega, double maxSpeed) {
+        // Log out current data about drivetrain
         CowDash.putBoolean(name+"::imuAvailable()", imuAvailable());
         CowDash.putBoolean(name+"::regulateHeading", regulateHeading);
         CowDash.putBoolean(name+"::haloDrive", haloDrive);
         CowDash.putBoolean(name+"::fieldOriented", fieldOriented);
         
+        double orientationTheta = getCurrentHeading();
+        CowDash.putNumber(name+"::orientationTheta", orientationTheta);
+        
+        // If we need to regulate heading and can do it
         if (imuAvailable() && regulateHeading) {
+            /**
+             * Halo Drive Mode:
+             * 
+             * - Robot moves in x-y space relative to field
+             * - Robot automatically turns to face direction of travel in x-y space
+             */
             if (haloDrive) {
-                double commandTheta = MathUtils.atan2(x,y)*180/Math.PI;
-                headingController.setTarget(commandTheta);
-                double orientationTheta = imu.getYaw();
-                double correctedTheta = commandTheta - orientationTheta;
-                double magnitude = Math.sqrt(y*y+x*x);
+                // Compute the angle of the stick and convert to degrees
+                double commandTheta = MathUtils.atan2(x,y) *180/Math.PI;
 
-                x = magnitude*Math.sin(correctedTheta);
-                y = magnitude*Math.cos(correctedTheta);
-                
-                rawDriveXYWT(x,y,headingController.feedAndGetValue(imu.getYaw()), maxSpeed);
+                // Compute the difference between field oriented theta and robot's current theta. This represents the equivalent angle the user is pushing the drive stick at.
+                double correctedTheta = commandTheta - orientationTheta;
+
+                // Compute the distance in x-y space the stick is pushed away (pythagorean theorem)
+                double magnitude = Math.sqrt(y*y+x*x);
+                // If the stick is pushed far enough, set the target angle to the direction the commanded.
+                if (magnitude>0.2)
+                    headingController.setTarget(commandTheta);
+                // Constrain magnitude to 1
+                if (magnitude>1) magnitude=1;
+
+                // Convert back from polar coords to cartesian. Remember to convert to radians.
+                x = magnitude*Math.sin(correctedTheta*Math.PI/180);
+                y = magnitude*Math.cos(correctedTheta*Math.PI/180);
+
+
+                // Send out drive commands
+                rawDriveXYWT(x,y,headingController.feedAndGetValue(orientationTheta), maxSpeed);
             } else {
+                /**
+                    * Field oriented drive mode:
+                    * 
+                    * - Robot moves in x-y space relative to field
+                    * - I.E. a push forwards results in the robot moving "north" on the field, regardless of orientation.
+                    */
                 if (fieldOriented) {
+                    // This code here is just like that up above.
                     double commandTheta = MathUtils.atan2(x,y)*180/Math.PI;
-                    double orientationTheta = imu.getYaw();
+
                     double correctedTheta = commandTheta - orientationTheta;
                     double magnitude = Math.sqrt(y*y+x*x);
+                    if (magnitude>1) magnitude=1;
 
-                    x = magnitude*Math.sin(correctedTheta);
-                    y = magnitude*Math.cos(correctedTheta);
+                    x = magnitude*Math.sin(correctedTheta*Math.PI/180);
+                    y = magnitude*Math.cos(correctedTheta*Math.PI/180);
                 }
-                
+
+                // If there's a significant rotation request, just act like rawDriveXYWT. However, set the target to the current heading so it behaves like normal.
                 if (Math.abs(omega)>0.1) {
                     rawDriveXYWT(x,y,omega,maxSpeed);
                     headingController.setTarget(imu.getYaw());
-                    headingController.resetIntegral();
+                    headingController.reset();
+                // If there's no request to rotate, regulate rotation.
                 } else {
-                    rawDriveXYWT(x,y,headingController.feedAndGetValue(imu.getYaw()), maxSpeed);
+                    rawDriveXYWT(x,y,headingController.feedAndGetValue(orientationTheta), maxSpeed);
                 }
             }
-        } else {
-            rawDriveXYWT(x,y,omega,maxSpeed);
+            //Short circuit out; we've accomplished setting motor values!
+            return;
         }
+        
+        // Not in regulating mode? Okay, just act like rawDriveXYWT.
+        rawDriveXYWT(x,y,omega,maxSpeed);
     }
 }
