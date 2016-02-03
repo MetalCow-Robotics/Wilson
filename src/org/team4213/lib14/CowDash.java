@@ -6,11 +6,13 @@
 
 package org.team4213.lib14;
 
+import com.sun.squawk.io.BufferedReader;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.Hashtable;
 import com.sun.squawk.io.BufferedWriter;
 import com.sun.squawk.microedition.io.FileConnection;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Enumeration;
 import javax.microedition.io.Connector;
@@ -25,7 +27,39 @@ public class CowDash {
     private static String uri = "./cowdash.table";
     
     static public void load() {
-        
+        FileConnection fileConnection = null;
+        try{
+            fileConnection = (FileConnection) Connector.open(uri);
+            
+            if (!fileConnection.exists()) {
+                System.err.println("CowDash.load: Could not find specified file!");
+                return;
+            }
+            
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fileConnection.openInputStream()));
+            
+            while(true) {
+                String line = reader.readLine();
+                if (line.length()<=0) break;
+                line=line.substring(1);
+                int index = line.indexOf("\":");
+                String key = line.substring(0, index);
+                char type = line.charAt(index+2);
+                switch(type) {
+                    case 'b':
+                        values.put(key, new Boolean(line.substring(index+3).equals("true")) );
+                        break;
+                    case 'f':
+                        values.put(key, new Double(Double.parseDouble(line.substring(index+3))) );
+                        break;
+                    case 's':
+                        values.put(key, line.substring(index+3) );
+                        break;
+                }
+            }
+        }catch(Exception ex) {
+            
+        }
     }
     
     /**
